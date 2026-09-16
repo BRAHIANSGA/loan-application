@@ -38,4 +38,22 @@ public sealed class CustomerTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => Customer.Register(request));
     }
+
+    [Fact]
+    public void Register_AmountWithMoreThanTwoDecimals_ThrowsArgumentException()
+    {
+        var request = TestData.ValidRequest() with { RequestedAmount = 1_000.125m };
+
+        Assert.Throws<ArgumentException>(() => Customer.Register(request));
+    }
+
+    [Fact]
+    public void Register_NamesWithExtraSpaces_StoresThemTrimmed()
+    {
+        var request = TestData.ValidRequest() with { FirstName = " Jane ", LastName = " Doe ", CompanyName = " Doe LLC " };
+
+        var customer = Customer.Register(request);
+
+        Assert.Equal(("Jane", "Doe", "Doe LLC"), (customer.FirstName, customer.LastName, customer.CompanyName));
+    }
 }

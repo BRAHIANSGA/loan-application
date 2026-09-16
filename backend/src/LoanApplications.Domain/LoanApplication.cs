@@ -20,6 +20,11 @@ public sealed class LoanApplication
     internal void ChangeRequestedAmount(decimal requestedAmount)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedAmount);
+        if (decimal.Round(requestedAmount, 2) != requestedAmount)
+        {
+            throw new ArgumentException("Requested amount cannot have more than two decimals.", nameof(requestedAmount));
+        }
+
         RequestedAmount = requestedAmount;
     }
 }

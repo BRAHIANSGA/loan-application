@@ -30,9 +30,9 @@ public sealed class Customer
 
     private void CopyDetailsFrom(LoanRequest request)
     {
-        FirstName = request.FirstName;
-        LastName = request.LastName;
-        CompanyName = request.CompanyName;
+        FirstName = request.FirstName.Trim();
+        LastName = request.LastName.Trim();
+        CompanyName = request.CompanyName.Trim();
         Address = request.Address;
     }
 }

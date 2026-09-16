@@ -32,7 +32,7 @@ public sealed class OutboxDispatcherTests(ApiFactory factory) : IAsyncLifetime
     {
         var client = factory.CreateClient();
         await client.SubmitAsync(TestRequests.Valid(ssn: "123-45-6789"));
-        await client.SubmitAsync(TestRequests.Valid(ssn: "987-65-4321"));
+        await client.SubmitAsync(TestRequests.Valid(ssn: "234-56-7890"));
         factory.ExternalCustomerClient.IsUnavailable = true;
 
         await factory.DispatchOutboxAsync();

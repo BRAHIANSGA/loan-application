@@ -78,11 +78,17 @@ The payload carries the customer, its address, the SSN and a nested `loanApplica
 (`id`, `requestedAmount`). Our `customerId` is the external key, so a returning customer
 always updates the same record.
 
-## Addresses
+## Input validation
 
-`Address` is a value object that normalizes itself: it trims every field, upper-cases the state and
-only accepts the 50 states plus DC and ZIP codes such as `12345` or `12345-6789`. The API returns
-`400` for an unknown state through `[UsStateCode]`, which reads the same `UsStates` list.
+Every rule is checked three times: in the form for immediate feedback, in the API for a `400` with
+field errors, and by the domain objects, which never hold invalid data.
+
+| Field | Rule |
+|---|---|
+| Requested amount | From $1 to $1,000,000,000, at most two decimals. The upper bound only protects the `numeric(18,2)` column; a credit limit would be a denial rule. |
+| SSN | `123-45-6789` or `123456789`, and a number the SSA issues: no area 000, 666 or 900-999, no group 00, no serial 0000. |
+| Address | Trimmed. The state must be one of the 50 states or DC (`UsStates`, shared by the API and the domain). ZIP `12345` or `12345-6789`. |
+| Names and company | Required and trimmed, up to 100 and 200 characters. |
 
 ## Database schema
 

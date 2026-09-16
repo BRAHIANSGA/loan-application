@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, type ComponentProps } from "react";
-import { Controller, useForm, type Control, type FieldPath } from "react-hook-form";
+import { Controller, useForm, useWatch, type Control, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { submitLoanApplication } from "@/app/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,6 +36,7 @@ export function LoanApplicationForm() {
     resolver: zodResolver(loanApplicationSchema),
     defaultValues: EMPTY_APPLICATION,
   });
+  const requestedAmount = useWatch({ control, name: "requestedAmount" });
 
   const onSubmit = (values: LoanApplicationValues) =>
     startTransition(async () => {
@@ -73,6 +74,8 @@ export function LoanApplicationForm() {
             label="Requested amount (USD)"
             placeholder="50000"
             inputMode="decimal"
+            format={formatAmount}
+            description={describeAmount(requestedAmount)}
           />
         </FieldSet>
 
@@ -166,4 +169,15 @@ function TextField({ control, name, label, description, format, ...inputProps }:
 function formatSsn(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 9);
   return [digits.slice(0, 3), digits.slice(3, 5), digits.slice(5)].filter(Boolean).join("-");
+}
+
+const USD = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+function formatAmount(value: string) {
+  const [whole, ...decimals] = value.replace(/[^\d.]/g, "").split(".");
+  return decimals.length > 0 ? `${whole}.${decimals.join("").slice(0, 2)}` : whole;
+}
+
+function describeAmount(amount: string) {
+  return Number(amount) > 0 ? `You are requesting ${USD.format(Number(amount))}` : undefined;
 }

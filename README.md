@@ -60,6 +60,7 @@ dotnet test --solution backend/LoanApplications.slnx
 | Denied by state | State **New York** |
 | Denied by SSN blacklist | SSN `111-11-1111`, `222-22-2222` or `333-33-3333` |
 | Returning customer | Submit `123-45-6789` again with a different amount or address |
+| Rejected input | SSN `000-12-3456`, amount `0.50` or `10.555`; through the API also state `ZZ` |
 
 After each approval, http://localhost:5090/customers shows what the external service received:
 one record per customer, updated in place for returning customers.

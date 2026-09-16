@@ -108,6 +108,30 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(0.5)]
+    [InlineData(10.555)]
+    [InlineData(1_000_000_000.01)]
+    public async Task Submit_InvalidAmount_ReturnsValidationError(double amount)
+    {
+        var request = TestRequests.Valid() with { RequestedAmount = (decimal)amount };
+
+        using var response = await factory.CreateClient().PostAsJsonAsync(
+            TestRequests.Endpoint, request, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Submit_SsnNeverIssued_ReturnsValidationError()
+    {
+        using var response = await factory.CreateClient().PostAsJsonAsync(
+            TestRequests.Endpoint, TestRequests.Valid(ssn: "000-12-3456"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task Submit_RuleRegisteredOnlyInDependencyInjection_DeniesWithItsReason()
     {

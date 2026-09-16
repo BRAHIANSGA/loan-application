@@ -21,6 +21,11 @@ public sealed class SsnTests
     [InlineData("1234567890")]
     [InlineData("1-2-3-4-5-6-7-8-9")]
     [InlineData("abc-de-fghi")]
+    [InlineData("000-12-3456")]
+    [InlineData("666-12-3456")]
+    [InlineData("900-12-3456")]
+    [InlineData("123-00-4567")]
+    [InlineData("123-45-0000")]
     public void Parse_InvalidFormat_ThrowsArgumentException(string input)
     {
         Assert.Throws<ArgumentException>(() => Ssn.Parse(input));

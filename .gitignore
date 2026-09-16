@@ -1,0 +1,12 @@
+# Personal working notes, not part of the deliverable
+notas/
+
+bin/
+obj/
+TestResults/
+.vs/
+node_modules/
+.next/
+.env*.local
+*.tsbuildinfo
+next-env.d.ts

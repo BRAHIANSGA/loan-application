@@ -78,6 +78,27 @@ The payload carries the customer, its address, the SSN and a nested `loanApplica
 (`id`, `requestedAmount`). Our `customerId` is the external key, so a returning customer
 always updates the same record.
 
+## Addresses
+
+`Address` is a value object that normalizes itself: it trims every field, upper-cases the state and
+only accepts the 50 states plus DC and ZIP codes such as `12345` or `12345-6789`. The API returns
+`400` for an unknown state through `[UsStateCode]`, which reads the same `UsStates` list.
+
+## Database schema
+
+The schema lives in code: the EF Core migrations in `Infrastructure/Persistence/Migrations`, applied
+when the API starts. To print the SQL they run (requires the `dotnet-ef` tool):
+
+```bash
+dotnet ef migrations script --project backend/src/LoanApplications.Infrastructure --startup-project backend/src/LoanApplications.Api
+```
+
+| Table | Notes |
+|---|---|
+| `Customers` | Personal data. Unique index on `Ssn`. The address is stored in `Address_*` columns (an EF Core complex type). |
+| `LoanApplications` | `Id`, `RequestedAmount`, `CustomerId`. A unique index on `CustomerId` enforces one application per customer in the database as well. |
+| `OutboxMessages` | `Operation`, `Payload` (`jsonb`), `OccurredAt`, `ProcessedAt`, `Attempts`, `LastError`. |
+
 ## Data protection
 
 The SSN is stored as nine digits, masked by `Ssn.ToString()` so it cannot leak through logs, never
@@ -95,6 +116,8 @@ returned by the API and never placed in a URL. The mock masks it on arrival.
 | Encryption of the SSN at rest | Out of scope. Production would use column encryption or a KMS. |
 | Migrations as a deployment step | Applied at startup for a one-command setup. |
 | Two new applications with the same SSN at the same instant | The unique index keeps one customer; the second request fails and can be retried. |
+| Address verification (USPS, or a provider such as Smarty) | Format and state code are validated; confirming that an address exists needs an external service. |
+| A second address line and US territories | Not required. `Address` and `UsStates` are the only places to change. |
 | Authentication | Excluded by the assignment. |
 | Frontend and browser end-to-end tests | The backend validates every request; the video covers the full flow. |
 | Credentials in `appsettings.json` and `docker-compose.yml` | Local defaults only. Production would read them from a secret store. |

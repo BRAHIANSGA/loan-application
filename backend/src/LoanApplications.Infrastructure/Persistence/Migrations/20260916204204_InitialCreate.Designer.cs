@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoanApplications.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(LoanApplicationsDbContext))]
-    [Migration("20260916182405_InitialCreate")]
+    [Migration("20260916204204_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -57,19 +57,23 @@ namespace LoanApplications.Infrastructure.Persistence.Migrations
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
                             b1.Property<string>("State")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)");
                         });
 
                     b.HasKey("Id");

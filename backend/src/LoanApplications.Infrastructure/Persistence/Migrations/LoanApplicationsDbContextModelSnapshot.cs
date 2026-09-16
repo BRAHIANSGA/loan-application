@@ -54,19 +54,23 @@ namespace LoanApplications.Infrastructure.Persistence.Migrations
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
 
                             b1.Property<string>("State")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)");
                         });
 
                     b.HasKey("Id");

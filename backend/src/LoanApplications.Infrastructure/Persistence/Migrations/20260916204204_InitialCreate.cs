@@ -20,10 +20,10 @@ public partial class InitialCreate : Migration
                 LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 CompanyName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                 Ssn = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false),
-                Address_City = table.Column<string>(type: "text", nullable: false),
-                Address_State = table.Column<string>(type: "text", nullable: false),
-                Address_Street = table.Column<string>(type: "text", nullable: false),
-                Address_ZipCode = table.Column<string>(type: "text", nullable: false)
+                Address_City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                Address_State = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                Address_Street = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                Address_ZipCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false)
             },
             constraints: table =>
             {

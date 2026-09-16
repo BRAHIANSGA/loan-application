@@ -100,6 +100,15 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
     }
 
     [Fact]
+    public async Task Submit_UnknownState_ReturnsValidationError()
+    {
+        using var response = await factory.CreateClient().PostAsJsonAsync(
+            TestRequests.Endpoint, TestRequests.Valid(state: "ZZ"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Submit_RuleRegisteredOnlyInDependencyInjection_DeniesWithItsReason()
     {
         var client = factory

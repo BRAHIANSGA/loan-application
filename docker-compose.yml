@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: loan_applications
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d loan_applications"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  mock:
+    build:
+      context: .
+      dockerfile: external-service-mock/Dockerfile
+    environment:
+      FailureRate: ${FAILURE_RATE:-0}
+    ports:
+      - "5090:8080"
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      ConnectionStrings__LoanApplications: Host=db;Port=5432;Database=loan_applications;Username=postgres;Password=postgres;GSS Encryption Mode=Disable
+      ExternalService__BaseUrl: http://mock:8080/
+    ports:
+      - "5080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      mock:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      API_URL: http://api:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api

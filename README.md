@@ -24,10 +24,16 @@ docker compose up --build
 | External service mock (what it received) | http://localhost:5090/customers |
 | PostgreSQL | `localhost:5432`, user `postgres`, password `postgres` |
 
-To see the background worker retry, start the mock with random failures (50% here):
+If port 5432 is already taken by a local PostgreSQL, change the host port in `docker-compose.yml`.
+
+To watch the background worker retry, start the mock with random failures (50% here):
 
 ```bash
 FAILURE_RATE=0.5 docker compose up --build
+```
+
+```powershell
+$env:FAILURE_RATE = "0.5"; docker compose up --build
 ```
 
 ### Run the apps outside Docker
@@ -49,18 +55,18 @@ Requirements: .NET 10 SDK and Docker running. Integration tests start a disposab
 dotnet test --solution backend/LoanApplications.slnx
 ```
 
-- **Unit tests:** each rule, the rule engine (including a rule it has never seen), the `Ssn` value object and the `Customer` aggregate.
-- **Integration tests:** the endpoint for approved, denied, returning-customer and invalid requests, the transaction rollback, a rule added only through dependency injection, and the outbox dispatcher.
+- **Unit tests:** each rule, the rule engine (including a rule it has never seen), the `Ssn` and `Address` value objects and the `Customer` aggregate with its amount and text bounds.
+- **Integration tests:** the endpoint for approved, denied, returning-customer and invalid requests, the transaction rollback when the event cannot be stored, a rule added only through dependency injection, and the outbox dispatcher.
 
 ## Test data
 
 | Scenario | What to enter |
 |---|---|
-| Approved | Any state except New York and SSN `123-45-6789` |
+| Approved | Any state other than New York, with SSN `123-45-6789` |
 | Denied by state | State **New York** |
 | Denied by SSN blacklist | SSN `111-11-1111`, `222-22-2222` or `333-33-3333` |
 | Returning customer | Submit `123-45-6789` again with a different amount or address |
-| Rejected input | SSN `000-12-3456`, amount `0.50` or `10.555`; through the API also state `ZZ` |
+| Rejected input | SSN `000-12-3456` or amount `0.50`; through the API also amount `10.555` and state `ZZ` |
 
 After each approval, http://localhost:5090/customers shows what the external service received:
 one record per customer, updated in place for returning customers.

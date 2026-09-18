@@ -54,7 +54,7 @@ internal sealed record Customer(
     Address Address,
     LoanApplication LoanApplication)
 {
-    // Only the last four digits ever leave this service, in logs or in responses.
+    // Last four digits only, in logs and in responses.
     public string Ssn { get; } = $"***-**-{Ssn[^4..]}";
 }
 

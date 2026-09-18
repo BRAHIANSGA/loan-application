@@ -30,21 +30,28 @@ public sealed class CustomerTests
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Register_NonPositiveAmount_ThrowsArgumentOutOfRangeException(int amount)
+    [InlineData(1)]
+    [InlineData(1_000_000_000)]
+    public void Register_AmountAtTheBounds_IsAccepted(int amount)
     {
         var request = TestData.ValidRequest() with { RequestedAmount = amount };
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => Customer.Register(request));
+        var customer = Customer.Register(request);
+
+        Assert.Equal(amount, customer.LoanApplication.RequestedAmount);
     }
 
-    [Fact]
-    public void Register_AmountWithMoreThanTwoDecimals_ThrowsArgumentException()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(0.5)]
+    [InlineData(1_000.125)]
+    [InlineData(1_000_000_000.01)]
+    public void Register_AmountOutOfBounds_ThrowsArgumentOutOfRangeException(double amount)
     {
-        var request = TestData.ValidRequest() with { RequestedAmount = 1_000.125m };
+        var request = TestData.ValidRequest() with { RequestedAmount = (decimal)amount };
 
-        Assert.Throws<ArgumentException>(() => Customer.Register(request));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Customer.Register(request));
     }
 
     [Fact]
@@ -55,5 +62,33 @@ public sealed class CustomerTests
         var customer = Customer.Register(request);
 
         Assert.Equal(("Jane", "Doe", "Doe LLC"), (customer.FirstName, customer.LastName, customer.CompanyName));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Register_BlankName_ThrowsArgumentException(string lastName)
+    {
+        var request = TestData.ValidRequest() with { LastName = lastName };
+
+        Assert.Throws<ArgumentException>(() => Customer.Register(request));
+    }
+
+    [Fact]
+    public void Register_CompanyNameTooLong_ThrowsArgumentOutOfRangeException()
+    {
+        var request = TestData.ValidRequest() with { CompanyName = new string('a', Customer.MaxCompanyNameLength + 1) };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => Customer.Register(request));
+    }
+
+    [Theory]
+    [InlineData("Jane\0Doe")]
+    [InlineData("Jane\nDoe")]
+    public void Register_NameWithControlCharacter_ThrowsArgumentException(string firstName)
+    {
+        var request = TestData.ValidRequest() with { FirstName = firstName };
+
+        Assert.Throws<ArgumentException>(() => Customer.Register(request));
     }
 }

@@ -15,7 +15,7 @@ public sealed partial record Ssn
 
     public static bool IsValid(string input) => TryNormalize(input, out _);
 
-    // Masked so a full SSN never leaks through logs or string interpolation.
+    // Masked: this is what logs and string interpolation see.
     public override string ToString() => $"***-**-{Value[^4..]}";
 
     // The SSA never issues area 000, 666 or 900-999, group 00 or serial 0000.

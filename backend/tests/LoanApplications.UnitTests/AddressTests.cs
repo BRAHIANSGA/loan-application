@@ -35,4 +35,18 @@ public sealed class AddressTests
     {
         Assert.Throws<ArgumentException>(() => new Address("  ", "Austin", "TX", "73301"));
     }
+
+    [Fact]
+    public void Constructor_StreetTooLong_ThrowsArgumentOutOfRangeException()
+    {
+        var street = new string('a', Address.MaxStreetLength + 1);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => new Address(street, "Austin", "TX", "73301"));
+    }
+
+    [Fact]
+    public void Constructor_CityWithControlCharacter_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => new Address("9 Oak St", "Aus\0tin", "TX", "73301"));
+    }
 }

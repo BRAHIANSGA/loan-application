@@ -2,6 +2,9 @@ namespace LoanApplications.Domain;
 
 public sealed class Customer
 {
+    public const int MaxNameLength = 100;
+    public const int MaxCompanyNameLength = 200;
+
     public Guid Id { get; private set; }
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
@@ -30,9 +33,9 @@ public sealed class Customer
 
     private void CopyDetailsFrom(LoanRequest request)
     {
-        FirstName = request.FirstName.Trim();
-        LastName = request.LastName.Trim();
-        CompanyName = request.CompanyName.Trim();
+        FirstName = PlainText.Required(request.FirstName, MaxNameLength, nameof(request.FirstName));
+        LastName = PlainText.Required(request.LastName, MaxNameLength, nameof(request.LastName));
+        CompanyName = PlainText.Required(request.CompanyName, MaxCompanyNameLength, nameof(request.CompanyName));
         Address = request.Address;
     }
 }

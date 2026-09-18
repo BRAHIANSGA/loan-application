@@ -1,4 +1,4 @@
 namespace LoanApplications.Domain.Decisions;
 
-// A string code instead of an enum, so adding a rule never requires editing a shared type.
+// Not an enum: a new rule must not have to edit a shared type.
 public sealed record DenialReason(string Code);

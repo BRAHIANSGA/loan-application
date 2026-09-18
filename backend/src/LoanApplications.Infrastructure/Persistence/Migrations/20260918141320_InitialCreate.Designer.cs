@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoanApplications.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(LoanApplicationsDbContext))]
-    [Migration("20260916204204_InitialCreate")]
+    [Migration("20260918141320_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -127,9 +127,6 @@ namespace LoanApplications.Infrastructure.Persistence.Migrations
                     b.Property<string>("Payload")
                         .IsRequired()
                         .HasColumnType("jsonb");
-
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

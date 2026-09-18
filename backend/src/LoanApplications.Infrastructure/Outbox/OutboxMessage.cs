@@ -8,11 +8,8 @@ public sealed class OutboxMessage(CustomerSyncOperation operation, string payloa
     public CustomerSyncOperation Operation { get; private set; } = operation;
     public string Payload { get; private set; } = payload;
     public DateTimeOffset OccurredAt { get; private set; } = occurredAt;
-    public DateTimeOffset? ProcessedAt { get; private set; }
     public int Attempts { get; private set; }
     public string? LastError { get; private set; }
-
-    public void MarkAsProcessed(DateTimeOffset processedAt) => ProcessedAt = processedAt;
 
     public void RecordFailure(string error)
     {

@@ -10,7 +10,7 @@ public sealed class SubmitLoanApplication(
     IOutbox outbox,
     IUnitOfWork unitOfWork)
 {
-    public async Task<SubmissionResult> HandleAsync(LoanRequest request, CancellationToken cancellationToken)
+    public async Task<SubmissionResult> SubmitAsync(LoanRequest request, CancellationToken cancellationToken)
     {
         var decision = await decisionEngine.DecideAsync(request, cancellationToken);
         if (!decision.IsApproved)
@@ -35,7 +35,6 @@ public sealed class SubmitLoanApplication(
             isReturningCustomer ? CustomerSyncOperation.Update : CustomerSyncOperation.Create,
             CustomerSnapshot.From(customer));
 
-        // The customer, the loan application and the outbox message are committed in one transaction.
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SubmissionResult.Approved(customer.Id, customer.LoanApplication.Id, isReturningCustomer);

@@ -14,7 +14,7 @@ public static class LoanApplicationEndpoints
         SubmitLoanApplication submitLoanApplication,
         CancellationToken cancellationToken)
     {
-        var result = await submitLoanApplication.HandleAsync(ToLoanRequest(request), cancellationToken);
+        var result = await submitLoanApplication.SubmitAsync(ToLoanRequest(request), cancellationToken);
         return TypedResults.Ok(SubmitLoanApplicationResponse.From(result));
     }
 

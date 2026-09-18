@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using LoanApplications.Application.CustomerSync;
 using LoanApplications.Domain;
 using LoanApplications.Domain.Decisions;
+using LoanApplications.Infrastructure.Outbox;
+using LoanApplications.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -71,11 +73,11 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
     }
 
     [Fact]
-    public async Task Submit_OutboxFails_StoresNothing()
+    public async Task Submit_OutboxRowCannotBeWritten_RollsBackCustomerAndApplication()
     {
         var client = factory
             .WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-                services.AddScoped<IOutbox, UnavailableOutbox>()))
+                services.AddScoped<IOutbox, MalformedPayloadOutbox>()))
             .CreateClient();
 
         using var response = await client.PostAsJsonAsync(
@@ -84,6 +86,7 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.Equal(0, await factory.QueryDatabaseAsync((db, token) => db.Customers.CountAsync(token)));
         Assert.Equal(0, await factory.QueryDatabaseAsync((db, token) => db.LoanApplications.CountAsync(token)));
+        Assert.Equal(0, await factory.QueryDatabaseAsync((db, token) => db.OutboxMessages.CountAsync(token)));
     }
 
     [Fact]
@@ -133,6 +136,17 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
     }
 
     [Fact]
+    public async Task Submit_NameWithControlCharacter_ReturnsValidationError()
+    {
+        var request = TestRequests.Valid() with { FirstName = "Jane\0Doe" };
+
+        using var response = await factory.CreateClient().PostAsJsonAsync(
+            TestRequests.Endpoint, request, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Submit_RuleRegisteredOnlyInDependencyInjection_DeniesWithItsReason()
     {
         var client = factory
@@ -146,10 +160,11 @@ public sealed class LoanApplicationEndpointTests(ApiFactory factory) : IAsyncLif
         Assert.Equal(new[] { ExcludedCompanyRule.Reason.Code }, response.DenialReasons);
     }
 
-    private sealed class UnavailableOutbox : IOutbox
+    // "not json" is rejected by the jsonb column, which makes SaveChanges fail mid-transaction.
+    private sealed class MalformedPayloadOutbox(LoanApplicationsDbContext dbContext, TimeProvider timeProvider) : IOutbox
     {
         public void Enqueue(CustomerSyncOperation operation, CustomerSnapshot customer) =>
-            throw new InvalidOperationException("Outbox unavailable.");
+            dbContext.OutboxMessages.Add(new OutboxMessage(operation, "not json", timeProvider.GetUtcNow()));
     }
 
     private sealed class ExcludedCompanyRule : IDenialRule

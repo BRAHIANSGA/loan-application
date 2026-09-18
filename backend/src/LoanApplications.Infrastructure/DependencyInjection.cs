@@ -19,12 +19,13 @@ public static class DependencyInjection
         services.AddDbContext<LoanApplicationsDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("LoanApplications")));
 
-        // These three resolve the same scoped DbContext, which is what makes them commit together.
+        // One scoped DbContext sits behind all three. That is the unit of work.
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<LoanApplicationsDbContext>());
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IOutbox, EfOutbox>();
 
-        services.AddSingleton<ISsnBlacklist, ConfigurationSsnBlacklist>();
+        // Parsed now: a malformed SSN in configuration should stop the app at startup.
+        services.AddSingleton<ISsnBlacklist>(new ConfigurationSsnBlacklist(configuration));
         services.TryAddSingleton(TimeProvider.System);
 
         var externalServiceUrl = configuration["ExternalService:BaseUrl"]
@@ -38,5 +39,11 @@ public static class DependencyInjection
         services.AddHostedService<OutboxWorker>();
 
         return services;
+    }
+
+    public static async Task MigrateDatabaseAsync(this IServiceProvider services)
+    {
+        await using var scope = services.CreateAsyncScope();
+        await scope.ServiceProvider.GetRequiredService<LoanApplicationsDbContext>().Database.MigrateAsync();
     }
 }

@@ -38,7 +38,6 @@ public partial class InitialCreate : Migration
                 Operation = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                 Payload = table.Column<string>(type: "jsonb", nullable: false),
                 OccurredAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                ProcessedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                 Attempts = table.Column<int>(type: "integer", nullable: false),
                 LastError = table.Column<string>(type: "text", nullable: true)
             },

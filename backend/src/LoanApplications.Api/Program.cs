@@ -3,8 +3,6 @@ using LoanApplications.Application;
 using LoanApplications.Domain.Decisions;
 using LoanApplications.Domain.Decisions.Rules;
 using LoanApplications.Infrastructure;
-using LoanApplications.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +20,7 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    await scope.ServiceProvider.GetRequiredService<LoanApplicationsDbContext>().Database.MigrateAsync();
-}
+await app.Services.MigrateDatabaseAsync();
 
 app.MapLoanApplicationEndpoints();
 

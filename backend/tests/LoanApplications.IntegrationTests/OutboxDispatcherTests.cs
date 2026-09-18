@@ -11,7 +11,7 @@ public sealed class OutboxDispatcherTests(ApiFactory factory) : IAsyncLifetime
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
-    public async Task ProcessPendingAsync_ServiceAvailable_SendsMessagesInOrderAndMarksThemProcessed()
+    public async Task ProcessPendingAsync_ServiceAvailable_SendsMessagesInOrderAndRemovesThem()
     {
         var client = factory.CreateClient();
         var created = await client.SubmitAsync(TestRequests.Valid());
@@ -23,12 +23,11 @@ public sealed class OutboxDispatcherTests(ApiFactory factory) : IAsyncLifetime
         Assert.Equal(
             new[] { (CustomerSyncOperation.Create, customerId), (CustomerSyncOperation.Update, customerId) },
             factory.ExternalCustomerClient.Calls);
-        Assert.Equal(0, await factory.QueryDatabaseAsync((db, token) =>
-            db.OutboxMessages.CountAsync(m => m.ProcessedAt == null, token)));
+        Assert.Equal(0, await factory.QueryDatabaseAsync((db, token) => db.OutboxMessages.CountAsync(token)));
     }
 
     [Fact]
-    public async Task ProcessPendingAsync_ServiceUnavailable_KeepsMessagesPendingAndStopsAtTheFirstFailure()
+    public async Task ProcessPendingAsync_ServiceUnavailable_KeepsMessagesAndStopsAtTheFirstFailure()
     {
         var client = factory.CreateClient();
         await client.SubmitAsync(TestRequests.Valid(ssn: "123-45-6789"));
@@ -39,7 +38,6 @@ public sealed class OutboxDispatcherTests(ApiFactory factory) : IAsyncLifetime
 
         var messages = await factory.QueryDatabaseAsync((db, token) =>
             db.OutboxMessages.OrderBy(m => m.OccurredAt).ToListAsync(token));
-        Assert.All(messages, message => Assert.Null(message.ProcessedAt));
         Assert.Equal(new[] { 1, 0 }, messages.Select(message => message.Attempts));
         Assert.Empty(factory.ExternalCustomerClient.Calls);
     }

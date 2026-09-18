@@ -55,7 +55,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ConnectionStrings:LoanApplications", _database.GetConnectionString());
         builder.ConfigureTestServices(services =>
         {
-            // Tests dispatch the outbox explicitly so their assertions are deterministic.
+            // No background worker in tests: each test dispatches the outbox itself.
             services.Remove(services.Single(service => service.ImplementationType == typeof(OutboxWorker)));
 
             services.RemoveAll<IExternalCustomerClient>();

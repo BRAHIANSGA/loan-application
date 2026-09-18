@@ -19,4 +19,7 @@ public sealed record CustomerSnapshot(
         customer.Ssn.Value,
         customer.Address,
         new LoanApplicationSnapshot(customer.LoanApplication.Id, customer.LoanApplication.RequestedAmount));
+
+    // Same masking as Ssn.ToString().
+    public override string ToString() => $"Customer {Id}, SSN ***-**-{Ssn[^4..]}";
 }

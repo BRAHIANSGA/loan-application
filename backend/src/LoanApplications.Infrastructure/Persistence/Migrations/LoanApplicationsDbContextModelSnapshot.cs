@@ -125,9 +125,6 @@ namespace LoanApplications.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
 
                     b.ToTable("OutboxMessages");

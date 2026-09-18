@@ -112,11 +112,43 @@ when the API starts. This prints the SQL they run (requires the `dotnet-ef` tool
 dotnet ef migrations script --project backend/src/LoanApplications.Infrastructure --startup-project backend/src/LoanApplications.Api
 ```
 
+```mermaid
+erDiagram
+    Customers ||--|| LoanApplications : "has one"
+
+    Customers {
+        uuid Id PK
+        varchar FirstName
+        varchar LastName
+        varchar CompanyName
+        varchar Ssn UK "nine digits"
+        varchar Address_Street
+        varchar Address_City
+        varchar Address_State
+        varchar Address_ZipCode
+    }
+
+    LoanApplications {
+        uuid Id PK
+        numeric RequestedAmount
+        uuid CustomerId FK "unique"
+    }
+
+    OutboxMessages {
+        uuid Id PK
+        varchar Operation "Create or Update"
+        jsonb Payload
+        timestamptz OccurredAt
+        int Attempts
+        text LastError "nullable"
+    }
+```
+
 | Table | Notes |
 |---|---|
-| `Customers` | Personal data. Unique index on `Ssn`. The address is stored in `Address_*` columns (an EF Core complex type). |
-| `LoanApplications` | `Id`, `RequestedAmount`, `CustomerId`. A unique index on `CustomerId` enforces one application per customer in the database as well. |
-| `OutboxMessages` | `Operation`, `Payload` (`jsonb`), `OccurredAt`, `Attempts`, `LastError`. A row is deleted once its message is delivered, so the table only holds pending work. |
+| `Customers` | Unique index on `Ssn`. The address has no table of its own: it is an EF Core complex type stored in the `Address_*` columns. |
+| `LoanApplications` | The unique index on `CustomerId` enforces one application per customer in the database as well. |
+| `OutboxMessages` | Not related to the other tables: its payload is a snapshot. A row is deleted once its message is delivered, so the table only holds pending work. |
 
 ## Data protection
 

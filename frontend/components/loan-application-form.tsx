@@ -29,10 +29,12 @@ const EMPTY_APPLICATION: LoanApplicationValues = {
   address: { street: "", city: "", state: "", zipCode: "" },
 };
 
+const fieldErrorId = (name: string) => `${name}-error`;
+
 export function LoanApplicationForm() {
   const [submitError, setSubmitError] = useState<string>();
   const [isSubmitting, startTransition] = useTransition();
-  const { control, handleSubmit } = useForm<LoanApplicationValues>({
+  const { control, handleSubmit, setError } = useForm<LoanApplicationValues>({
     resolver: zodResolver(loanApplicationSchema),
     defaultValues: EMPTY_APPLICATION,
   });
@@ -42,6 +44,9 @@ export function LoanApplicationForm() {
     startTransition(async () => {
       const result = await submitLoanApplication(values);
       setSubmitError(result?.error);
+      for (const [name, message] of Object.entries(result?.fieldErrors ?? {})) {
+        setError(name as FieldPath<LoanApplicationValues>, { message });
+      }
     });
 
   return (
@@ -96,7 +101,13 @@ export function LoanApplicationForm() {
                     value={field.value || null}
                     onValueChange={field.onChange}
                   >
-                    <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="w-full">
+                    <SelectTrigger
+                      id={field.name}
+                      ref={field.ref}
+                      aria-invalid={fieldState.invalid}
+                      aria-describedby={fieldState.invalid ? fieldErrorId(field.name) : undefined}
+                      className="w-full"
+                    >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
@@ -107,7 +118,7 @@ export function LoanApplicationForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError id={fieldErrorId(field.name)} errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -156,10 +167,11 @@ function TextField({ control, name, label, description, format, ...inputProps }:
             {...field}
             id={field.name}
             aria-invalid={fieldState.invalid}
+            aria-describedby={fieldState.invalid ? fieldErrorId(field.name) : undefined}
             onChange={(event) => field.onChange(format ? format(event.target.value) : event.target.value)}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
-          <FieldError errors={[fieldState.error]} />
+          <FieldError id={fieldErrorId(field.name)} errors={[fieldState.error]} />
         </Field>
       )}
     />

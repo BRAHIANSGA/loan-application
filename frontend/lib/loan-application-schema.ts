@@ -6,20 +6,10 @@ const MAX_AMOUNT = 1_000_000_000;
 const requiredText = (label: string, maxLength: number) =>
   z.string().trim().min(1, `${label} is required`).max(maxLength, `${label} is too long`);
 
-// Same rule as the backend: the SSA never issues area 000, 666 or 900-999, group 00 or serial 0000.
-const isIssuableSsn = (ssn: string) => {
-  const [area = "", group = "", serial = ""] = ssn.split("-");
-  return !["000", "666"].includes(area) && !area.startsWith("9") && group !== "00" && serial !== "0000";
-};
-
 export const loanApplicationSchema = z.object({
   firstName: requiredText("First name", 100),
   lastName: requiredText("Last name", 100),
-  ssn: z
-    .string()
-    .trim()
-    .regex(/^\d{3}-\d{2}-\d{4}$/, "Enter the SSN as 123-45-6789")
-    .refine(isIssuableSsn, "Enter a valid SSN"),
+  ssn: z.string().trim().regex(/^\d{3}-\d{2}-\d{4}$/, "Enter the SSN as 123-45-6789"),
   companyName: requiredText("Company name", 200),
   requestedAmount: z
     .string()

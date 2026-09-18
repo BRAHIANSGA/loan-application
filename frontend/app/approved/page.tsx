@@ -1,9 +1,13 @@
 import { CircleCheck } from "lucide-react";
+import { redirect } from "next/navigation";
 import { ResultCard } from "@/components/result-card";
 import { CardContent } from "@/components/ui/card";
 
 export default async function ApprovedPage({ searchParams }: PageProps<"/approved">) {
   const { applicationId, returning } = await searchParams;
+  if (!applicationId) {
+    redirect("/");
+  }
   const isReturningCustomer = returning === "true";
 
   return (
@@ -16,11 +20,9 @@ export default async function ApprovedPage({ searchParams }: PageProps<"/approve
           : "Your application passed our initial review. Our team will contact you soon."
       }
     >
-      {applicationId && (
-        <CardContent className="text-center text-sm text-muted-foreground">
-          Reference number <span className="block font-mono text-foreground">{applicationId}</span>
-        </CardContent>
-      )}
+      <CardContent className="text-center text-sm text-muted-foreground">
+        Reference number <span className="block font-mono text-foreground">{applicationId}</span>
+      </CardContent>
     </ResultCard>
   );
 }

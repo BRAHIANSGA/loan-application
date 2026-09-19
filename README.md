@@ -1,6 +1,8 @@
 # Loan Application
 
-> **Video walkthrough:** _pending, will be added here before submission._
+> **Video walkthrough** (11 min, narrated in Spanish): [YouTube](https://youtu.be/UgbwgYs22co) | [Google Drive copy](https://drive.google.com/file/d/1HpQDUpORCwvoxxvbKUuv6Sk6oGsTpJSP/view?usp=sharing).
+> It tours the code first and then runs the five flows: approved, denied by state, denied by
+> blacklist, returning customer and the external service receiving the data.
 
 A small business loan application flow. A Next.js form sends the application to a .NET API,
 a rule engine approves or denies it, approved applications are stored in PostgreSQL in a single

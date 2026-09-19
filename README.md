@@ -1,6 +1,6 @@
 # Loan Application
 
-> **Video walkthrough** (11 min): [YouTube](https://youtu.be/UgbwgYs22co) | [Google Drive copy](https://drive.google.com/file/d/1HpQDUpORCwvoxxvbKUuv6Sk6oGsTpJSP/view?usp=sharing).
+> **Video walkthrough:** [YouTube](https://youtu.be/UgbwgYs22co) | [Google Drive copy](https://drive.google.com/file/d/1HpQDUpORCwvoxxvbKUuv6Sk6oGsTpJSP/view?usp=sharing).
 > It tours the code first and then runs the five flows: approved, denied by state, denied by
 > blacklist, returning customer and the external service receiving the data.
 
